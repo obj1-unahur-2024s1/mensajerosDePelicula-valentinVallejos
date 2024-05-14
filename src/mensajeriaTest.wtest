@@ -1,0 +1,126 @@
+import mensajeria.*
+import mensajerosYDestinos.*
+test "mesanjeria es grande" {
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(roberto)
+	mensajeria.contratarMesanjero(chuckNorris)
+	assert.that(mensajeria.esGrande())
+
+}
+
+test "mesanjeria el primero puede entregar el paquete" {
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+	neo.tieneCredito(true)
+	paquete.estaPago(true)
+	paquete.destino(laMatrix)
+	assert.that( mensajeria.elPrimeroPuedeEntregarElPaquete(paquete))
+
+}
+
+test "mesanjeria el peso del ultimo" {
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+
+	assert.equals(mensajeria.pesoDelUltimo() , 80)
+
+}
+
+test "mesanjeria alguin puede entregar el paquete" {
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+	neo.tieneCredito(true)
+	paqueton.agregarDestino(laMatrix)
+	
+
+	assert.notThat(mensajeria.alguienPuendeEntregarElPaquete(paqueton))
+	
+	paqueton.pagar()
+	
+	assert.that(mensajeria.alguienPuendeEntregarElPaquete(paqueton))
+
+}
+
+test "mensajeria quienes pueden entregar el paquete"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+	neo.tieneCredito(true)
+	paquetito.destino(laMatrix)
+	
+	assert.equals( [neo, chuckNorris ] , mensajeria.quienesPuedenEntregarElPaquete(paquetito) )
+}
+
+test "mensajeria sin sobre peso"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+
+	
+	assert.notThat(mensajeria.mensajeriaConSobrePeso())
+}
+
+test "mensajeria con sobre peso"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(roberto)
+	mensajeria.contratarMesanjero(chuckNorris)
+	roberto.pesoDeRoberto(90)
+	roberto.viajaEncamionConxAcoplados(1)
+	
+	assert.that(mensajeria.mensajeriaConSobrePeso())
+}
+
+test"mensajeria enviar paquete"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+	paquete.destino(laMatrix)
+	paquete.estaPago(true)
+	mensajeria.enviarPaquete(paquete)
+	
+	assert.equals(50 , mensajeria.recaudaciones())
+	
+}
+
+test"mensajeria enviar muchos paquetes"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(chuckNorris)
+	
+	paquete.destino(laMatrix)
+	paquetito.destino( puenteDeBrooklyn)
+	paqueton.agregarDestino( puenteDeBrooklyn)
+	paqueton.agregarDestino(laMatrix )
+	paquete.estaPago(true)
+	paqueton.pagar()
+	paqueton.pagar()
+	
+	mensajeria.enviarPaquetes(#{paquete , paquetito , paqueton})
+	
+	assert.equals(0 + 50 + 200 ,  mensajeria.recaudaciones() )
+}
+
+test " mensajeria enviar paquete pendiente mas caro"{
+	mensajeria.contratarMesanjero(neo)
+	mensajeria.contratarMesanjero(roberto)
+	roberto.pesoDeRoberto(90)
+	roberto.viajaEncamionConxAcoplados(1)
+
+	
+	paquete.destino(laMatrix)
+	paquetito.destino( puenteDeBrooklyn)
+	paqueton.agregarDestino( puenteDeBrooklyn)
+	paqueton.agregarDestino(laMatrix )
+	paquete.estaPago(true)
+	paqueton.pagar()
+	paqueton.pagar()
+	
+	mensajeria.enviarPaquetes([paquete , paquetito , paqueton])
+	
+	//solo se en via el paquetito, quedarian pendientes los que van a la matriz y el mas caro es el paqueton
+	
+	neo.tieneCredito(true)
+	
+	mensajeria.enviarPendienteMasCaro()
+	assert.equals(  200 ,  mensajeria.recaudaciones() )
+	assert.equals( [paquete], mensajeria.paquetesPendientes() )
+}
+
+
+
